@@ -1,0 +1,23 @@
+th {
+    white-space: nowrap
+}
+
+td {
+    word-break: break-all
+}
+
+.event-detail p {
+    white-space: normal; 
+    word-break: break-all;
+}
+
+.custom-switch {
+    padding-left: 0;
+}
+
+.sticky-card-footer {
+    position: sticky; 
+    bottom: 0; 
+    background: white; 
+    z-index: 9999
+}

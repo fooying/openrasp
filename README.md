@@ -15,31 +15,38 @@ When an attack happens, WAF matches the malicious request with its signatures an
 
 ### Quick Start
 
-See detailed installation instructions [here](https://rasp.baidu.com/doc/install/main.html)
+See detailed installation instructions [here](https://github.com/baidu/openrasp/wiki/Installation)
 
 We also provide a few test cases that are corresponding to OWASP TOP 10 attacks, [download here](https://rasp.baidu.com/doc/install/testcase.html)
 
 ### FAQ
 
-##### 1. List of supported web application servers
+#### 1. List of supported web application servers
 
-Only Java based web application servers are supported for now. The support of other web application servers will also be soon included in the coming releases.
+We've fully tested OpenRASP on the following application servers for Linux platforms:
 
-We've fully tested OpenRASP on the following application servers for both Linux and Windows platforms.
+* Java
+  * Tomcat 6-9
+  * JBoss 4.X
+  * Jetty 7-9
+  * Resin 3-4
+  * SpringBoot 1-2
+  * IBM WebSphpere 8.5, 9.0
+  * WebLogic 10.3.6, 12.2.1
+* PHP
+  * 5.3-5.6, 7.0-7.3
 
-* Tomcat 6-8
-* JBoss 4.X
-* Jetty 7-9
+The support of other web application servers will also be soon included in the coming releases.
 
-##### 2. Performance impact on application servers
+#### 2. Performance impact on application servers
 
-We ran multiple intense and long-lasting stress tests prior to release. Even in the worst-case scenario (where the hook point got continuously triggered) the server’s performance was only reduced by 5%
+We ran multiple intense and long-lasting stress tests prior to release. Even in the worst-case scenario (where the hook point got continuously triggered) the server’s performance was only reduced by 1~4%
 
-##### 3. Integration with existing SIEM or SOC
+#### 3. Integration with existing SIEM or SOC
 
 OpenRASP logs alarms in JSON format, which can be easily picked up by LogStash, rsyslog or Flume.
 
-##### 4. How to develop a new plugin?
+#### 4. How to develop a new plugin?
 
 A plugin receives a callback when an event occurs. It then determines if the current behavior is malicious or not and blocks the associated request if necessary.
 

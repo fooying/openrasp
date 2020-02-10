@@ -4,65 +4,36 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.fuxi.javaagent</groupId>
-    <artifactId>rasp</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <repositories>
-        <repository>
-            <id>in-project</id>
-            <name>In Project Repo</name>
-            <url>file://${project.basedir}/lib</url>
-        </repository>
-    </repositories>
-    <dependencies>
-        <dependency>
-            <groupId>com.fuxi.javaagent</groupId>
-            <artifactId>jnotify</artifactId>
-            <version>1.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fuxi.javaagent</groupId>
-            <artifactId>sqlparser</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-all</artifactId>
-            <version>5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mozilla</groupId>
-            <artifactId>rhino</artifactId>
-            <version>1.7.7.2</version>
-        </dependency>
-    </dependencies>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <rasp.version>1.2.3</rasp.version>
+    </properties>
+
+    <groupId>com.baidu.openrasp</groupId>
+    <artifactId>openrasp</artifactId>
+    <version>${rasp.version}</version>
+    <packaging>pom</packaging>
 
     <scm>
         <connection>scm:git:https://github.com/baidu/openrasp</connection>
         <developerConnection>scm:git:https://github.com/baidu/openrasp</developerConnection>
         <url>https://github.com/baidu/openrasp</url>
     </scm>
+
+    <modules>
+        <module>boot</module>
+        <module>engine</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.baidu.openrasp</groupId>
+                <artifactId>rasp-boot</artifactId>
+                <version>${rasp.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <finalName>rasp</finalName>
@@ -85,6 +56,30 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <!-- support for JDK 6 -->
+                <version>2.1.5</version>
+                <executions>
+                    <execution>
+                        <id>git-commit-id</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                            <prefix>git-commit-id</prefix>
+                            <skipPoms>false</skipPoms>
+                            <dotGitDirectory>${session.executionRootDirectory}/../../.git/</dotGitDirectory>
+                            <gitDescribe>
+                                <skip>true</skip>
+                            </gitDescribe>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
@@ -105,43 +100,105 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.abego.treelayout:org.abego.treelayout.core</exclude>
+                                </excludes>
+                            </artifactSet>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Project-Version>${project.version}</Project-Version>
                                         <Build-Time>${maven.build.timestamp}</Build-Time>
-                                        <Git-Commit>${buildNumber}</Git-Commit>
-                                        <Can-Redefine-Classes>TRUE</Can-Redefine-Classes>
-                                        <Premain-Class>com.fuxi.javaagent.Agent</Premain-Class>
-                                        <Can-Retransform-Classes>TRUE</Can-Retransform-Classes>
+                                        <Git-Commit>${git-commit-id.commit.id.abbrev}</Git-Commit>
+                                        <Git-Branch>${git-commit-id.branch}</Git-Branch>
+                                        <Last-Commit-User-Name>${git-commit-id.commit.user.name}</Last-Commit-User-Name>
+                                        <Last-Commit-User-Email>${git-commit-id.commit.user.email}
+                                        </Last-Commit-User-Email>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
                             <relocations>
                                 <relocation>
                                     <pattern>org.apache.commons.lang3</pattern>
-                                    <shadedPattern>com.fuxi.javaagent</shadedPattern>
+                                    <shadedPattern>com.baidu.openrasp</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.commons.io</pattern>
-                                    <shadedPattern>com.fuxi.javaagent</shadedPattern>
+                                    <shadedPattern>com.baidu.openrasp</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.cli</pattern>
+                                    <shadedPattern>com.baidu.openrasp.cli</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.objectweb</pattern>
-                                    <shadedPattern>com.fuxi.javaagent</shadedPattern>
+                                    <shadedPattern>com.baidu.openrasp</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.google</pattern>
-                                    <shadedPattern>com.fuxi.javaagent</shadedPattern>
+                                    <shadedPattern>com.baidu.openrasp</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.yaml</pattern>
+                                    <shadedPattern>com.baidu.openrasp</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.log4j</pattern>
-                                    <shadedPattern>com.fuxi.javaagent.log4j</shadedPattern>
+                                    <shadedPattern>com.baidu.openrasp.log4j</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>log4j.configuration</pattern>
                                     <shadedPattern>log4j.rasp.configuration</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>log4j.xml</pattern>
+                                    <shadedPattern>log4j.rasp.xml</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>log4j.properties</pattern>
+                                    <shadedPattern>log4j.rasp.properties</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>log4j.configuratorClass</pattern>
+                                    <shadedPattern>log4j.rasp.configuratorClass</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>log4j.defaultInitOverride</pattern>
+                                    <shadedPattern>log4j.rasp.defaultInitOverride</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.abego</pattern>
+                                    <shadedPattern>com.baidu.openrasp.abego</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.antlr</pattern>
+                                    <shadedPattern>com.baidu.openrasp.antlr</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.stringtemplate</pattern>
+                                    <shadedPattern>com.baidu.openrasp.stringtemplate</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.stringtemplate</pattern>
+                                    <shadedPattern>com.baidu.openrasp.stringtemplate</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>st4hidden.org.antlr</pattern>
+                                    <shadedPattern>com.baidu.openrasp.st4hidden.org.antlr</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>javassist</pattern>
+                                    <shadedPattern>com.baidu.openrasp.javassist</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.mozilla</pattern>
+                                    <shadedPattern>com.baidu.openrasp.org.mozilla</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.strobel</pattern>
+                                    <shadedPattern>com.baidu.openrasp.strobel</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -156,29 +213,6 @@
                     <reportOutputDirectory>../javadocs</reportOutputDirectory>
                     <destDir>rasp-doc</destDir>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.0.2</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <!-- here the phase you need -->
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/src/main/resources/environment</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/../../openrasp-plugin-devtool/dist</directory>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
